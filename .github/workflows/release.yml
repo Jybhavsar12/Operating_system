@@ -1,0 +1,154 @@
+name: Release SimpleOS
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    name: Build Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Get version from tag
+      id: get_version
+      run: |
+        if [ "${{ github.ref_type }}" = "tag" ]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+        else
+          VERSION="dev-$(git rev-parse --short HEAD)"
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Building version: $VERSION"
+        
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y nasm qemu-system-x86 build-essential
+        
+    - name: Install i686-elf cross-compiler
+      run: |
+        wget https://github.com/lordmilko/i686-elf-tools/releases/download/7.1.0/i686-elf-tools-linux.zip
+        unzip i686-elf-tools-linux.zip
+        echo "$PWD/i686-elf-tools-linux/bin" >> $GITHUB_PATH
+        
+    - name: Build OS
+      run: make all
+      
+    - name: Create release package
+      run: |
+        mkdir -p release
+        cp build/os-image.bin release/SimpleOS-${{ steps.get_version.outputs.version }}.bin
+        cp build/boot.bin release/bootloader.bin
+        cp build/kernel.bin release/kernel.bin
+        cp README.md LICENSE release/
+        
+        # Create a README for the release
+        cat > release/README.txt << EOF
+        SimpleOS ${{ steps.get_version.outputs.version }}
+        =====================================
+        
+        Educational Operating System
+        Copyright (c) 2026 Jyot Bhavsar
+        
+        Files included:
+        - SimpleOS-${{ steps.get_version.outputs.version }}.bin : Complete bootable OS image
+        - bootloader.bin : Bootloader only
+        - kernel.bin : Kernel only
+        - README.md : Project documentation
+        - LICENSE : MIT License
+        
+        To run:
+        qemu-system-i386 -drive format=raw,file=SimpleOS-${{ steps.get_version.outputs.version }}.bin
+        
+        Or write to a USB drive (Linux):
+        sudo dd if=SimpleOS-${{ steps.get_version.outputs.version }}.bin of=/dev/sdX bs=512
+        
+        For more information, visit:
+        https://github.com/Jybhavsar12/Operating_system
+        EOF
+        
+    - name: Create checksums
+      run: |
+        cd release
+        sha256sum *.bin > SHA256SUMS
+        cat SHA256SUMS
+        
+    - name: Create release archive
+      run: |
+        tar -czf SimpleOS-${{ steps.get_version.outputs.version }}.tar.gz -C release .
+        zip -r SimpleOS-${{ steps.get_version.outputs.version }}.zip release/
+        
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        cat > release_notes.md << EOF
+        ## SimpleOS ${{ steps.get_version.outputs.version }}
+        
+        ### Features
+        - 32-bit protected mode kernel
+        - VGA text mode display driver
+        - PS/2 keyboard driver with interrupt handling
+        - Interactive shell with commands (help, clear, about, echo)
+        - Basic memory management
+        - GDT, IDT, and ISR implementation
+        
+        ### System Requirements
+        - x86-compatible processor (i686 or newer)
+        - 1 MB RAM minimum
+        - VGA-compatible display
+        - PS/2 keyboard
+        
+        ### Running the OS
+        
+        **In QEMU:**
+        \`\`\`bash
+        qemu-system-i386 -drive format=raw,file=SimpleOS-${{ steps.get_version.outputs.version }}.bin
+        \`\`\`
+        
+        **On real hardware (USB boot):**
+        \`\`\`bash
+        sudo dd if=SimpleOS-${{ steps.get_version.outputs.version }}.bin of=/dev/sdX bs=512
+        \`\`\`
+        ⚠️ Replace /dev/sdX with your USB device. This will erase all data on the USB drive!
+        
+        ### Files
+        - \`SimpleOS-${{ steps.get_version.outputs.version }}.bin\` - Complete bootable OS image
+        - \`SimpleOS-${{ steps.get_version.outputs.version }}.tar.gz\` - Release archive (tar.gz)
+        - \`SimpleOS-${{ steps.get_version.outputs.version }}.zip\` - Release archive (zip)
+        
+        ### Documentation
+        See the [repository](https://github.com/Jybhavsar12/Operating_system) for full documentation.
+        EOF
+        
+    - name: Create GitHub Release
+      if: github.ref_type == 'tag'
+      uses: softprops/action-gh-release@v1
+      with:
+        name: SimpleOS ${{ steps.get_version.outputs.version }}
+        body_path: release_notes.md
+        files: |
+          SimpleOS-${{ steps.get_version.outputs.version }}.tar.gz
+          SimpleOS-${{ steps.get_version.outputs.version }}.zip
+          release/SimpleOS-${{ steps.get_version.outputs.version }}.bin
+          release/SHA256SUMS
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-${{ steps.get_version.outputs.version }}
+        path: |
+          SimpleOS-${{ steps.get_version.outputs.version }}.tar.gz
+          SimpleOS-${{ steps.get_version.outputs.version }}.zip
+          release/
+        retention-days: 90
+

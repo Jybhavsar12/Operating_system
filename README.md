@@ -1,5 +1,9 @@
 # SimpleOS - Educational Operating System
 
+[![Build SimpleOS](https://github.com/Jybhavsar12/Operating_system/actions/workflows/build.yml/badge.svg)](https://github.com/Jybhavsar12/Operating_system/actions/workflows/build.yml)
+[![Release](https://github.com/Jybhavsar12/Operating_system/actions/workflows/release.yml/badge.svg)](https://github.com/Jybhavsar12/Operating_system/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Overview
 
 SimpleOS is a lightweight, educational operating system designed to help students and enthusiasts understand the fundamentals of OS development. Built from scratch using C and x86 Assembly, this project demonstrates core operating system concepts in a clear and accessible way.
@@ -147,6 +151,24 @@ make debug
 # Run with serial output
 make run-serial
 ```
+
+## Continuous Integration
+
+This project uses GitHub Actions for automated building and testing:
+
+- **Build Workflow**: Automatically builds the OS on every push and pull request
+  - Compiles bootloader and kernel
+  - Verifies build artifacts
+  - Tests boot process in QEMU
+  - Runs code quality checks
+
+- **Release Workflow**: Creates releases when version tags are pushed
+  - Builds release binaries
+  - Generates checksums
+  - Creates downloadable archives
+  - Publishes GitHub releases
+
+View the build status and download pre-built OS images from the [Actions](https://github.com/Jybhavsar12/Operating_system/actions) tab.
 
 ## Learning Resources
 
