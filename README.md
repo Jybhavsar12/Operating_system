@@ -17,14 +17,24 @@ SimpleOS is a lightweight, educational operating system designed to help student
 
 ## Features
 
+### Core System
 - Custom bootloader (16-bit real mode)
 - 32-bit protected mode kernel
-- VGA text mode display driver
 - Global Descriptor Table (GDT)
 - Interrupt Descriptor Table (IDT)
 - Keyboard driver with interrupt handling
 - Basic memory management
-- Simple command-line shell
+
+### User Interface
+- **GUI Mode** (NEW! 🎨)
+  - VGA graphics mode (320x200, 256 colors)
+  - Login screen with authentication
+  - Graphical desktop environment
+  - Windows, buttons, textboxes, and labels
+  - 8x8 bitmap font rendering
+- **Text Mode**
+  - VGA text mode display driver
+  - Simple command-line shell
 
 ## Architecture
 
@@ -86,7 +96,18 @@ SimpleOS Architecture
    make run
    ```
 
-5. Clean build files
+5. **Login to the GUI** (default mode)
+   - Username: `admin`
+   - Password: `password`
+   - Press `Tab` to switch between fields
+   - Press `Enter` to login
+
+6. **Switch to Text Mode** (optional)
+   - Edit `kernel/kernel.c`
+   - Change `boot_mode = BOOT_MODE_GUI` to `boot_mode = BOOT_MODE_TEXT`
+   - Rebuild: `make clean && make`
+
+7. Clean build files
    ```bash
    make clean
    ```
@@ -95,12 +116,16 @@ SimpleOS Architecture
 
 Detailed documentation is available in the `docs/` directory:
 
+- [Quick Start Guide](docs/QUICK_START.md) - Get started in 5 minutes
+- [GUI System](docs/GUI_SYSTEM.md) - **NEW!** Graphical interface guide
 - [Building from Source](docs/BUILDING.md)
 - [Architecture Overview](docs/ARCHITECTURE.md)
 - [Bootloader Explained](docs/BOOTLOADER.md)
 - [Kernel Development](docs/KERNEL.md)
 - [Memory Management](docs/MEMORY.md)
 - [Driver Development](docs/DRIVERS.md)
+- [CI/CD Pipeline](docs/CI_CD.md)
+- [Troubleshooting](docs/CI_TROUBLESHOOTING.md)
 - [Contributing Guide](docs/CONTRIBUTING.md)
 
 ## Development

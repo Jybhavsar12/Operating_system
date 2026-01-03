@@ -8,6 +8,8 @@
 #include "../../include/screen.h"
 #include "../../include/isr.h"
 #include "../../include/shell.h"
+#include "../../include/login.h"
+#include "../../include/desktop.h"
 
 // Scancode to ASCII mapping (US keyboard layout)
 const char scancode_to_ascii[] = {
@@ -28,6 +30,7 @@ const char scancode_to_ascii_shift[] = {
 };
 
 static int shift_pressed = 0;
+static keyboard_mode_t current_mode = KEYBOARD_MODE_SHELL;
 
 /**
  * keyboard_handler - IRQ1 interrupt handler for keyboard
@@ -35,7 +38,7 @@ static int shift_pressed = 0;
  */
 void keyboard_handler(registers_t regs) {
     uint8_t scancode = port_byte_in(0x60);
-    
+
     // Handle shift keys
     if (scancode == 0x2A || scancode == 0x36) {
         shift_pressed = 1;
@@ -45,12 +48,12 @@ void keyboard_handler(registers_t regs) {
         shift_pressed = 0;
         return;
     }
-    
+
     // Ignore key release events (scancode >= 0x80)
     if (scancode >= 0x80) {
         return;
     }
-    
+
     // Convert scancode to ASCII
     char c;
     if (scancode < sizeof(scancode_to_ascii)) {
@@ -61,9 +64,37 @@ void keyboard_handler(registers_t regs) {
         }
 
         if (c != 0) {
-            shell_handle_input(c);
+            // Route input based on current mode
+            switch (current_mode) {
+                case KEYBOARD_MODE_SHELL:
+                    shell_handle_input(c);
+                    break;
+                case KEYBOARD_MODE_LOGIN:
+                    login_handle_key(c);
+                    break;
+                case KEYBOARD_MODE_DESKTOP:
+                    desktop_handle_key(c);
+                    break;
+            }
         }
     }
+}
+
+/**
+ * keyboard_set_mode - Set keyboard input mode
+ * @mode: New keyboard mode
+ */
+void keyboard_set_mode(keyboard_mode_t mode) {
+    current_mode = mode;
+}
+
+/**
+ * keyboard_get_mode - Get current keyboard mode
+ *
+ * Return: Current mode
+ */
+keyboard_mode_t keyboard_get_mode(void) {
+    return current_mode;
 }
 
 /**
@@ -72,5 +103,6 @@ void keyboard_handler(registers_t regs) {
 void keyboard_init(void) {
     // Keyboard uses IRQ1 (interrupt 33)
     // Handler will be registered through IRQ system
+    current_mode = KEYBOARD_MODE_SHELL;
 }
 

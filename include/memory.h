@@ -66,5 +66,14 @@ uint32_t strlen(const char *str);
  */
 int strcmp(const char *str1, const char *str2);
 
+/**
+ * strcpy - Copy string from source to destination
+ * @dest: Destination buffer
+ * @src: Source string
+ *
+ * Return: Pointer to destination
+ */
+char *strcpy(char *dest, const char *src);
+
 #endif // MEMORY_H
 

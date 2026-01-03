@@ -115,3 +115,19 @@ int strcmp(const char *str1, const char *str2) {
     return *(const uint8_t *)str1 - *(const uint8_t *)str2;
 }
 
+/**
+ * strcpy - Copy string from source to destination
+ * @dest: Destination buffer
+ * @src: Source string
+ *
+ * Return: Pointer to destination
+ */
+char *strcpy(char *dest, const char *src) {
+    char *original_dest = dest;
+    while (*src) {
+        *dest++ = *src++;
+    }
+    *dest = '\0';
+    return original_dest;
+}
+
