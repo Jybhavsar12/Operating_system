@@ -38,34 +38,34 @@ void login_init(void) {
     // Initialize GUI
     gui_init();
     
-    // Setup login window
-    login_window.x = 60;
-    login_window.y = 40;
-    login_window.width = 200;
-    login_window.height = 120;
+    // Setup login window (adjusted for 80x25 text mode)
+    login_window.x = 15;
+    login_window.y = 3;
+    login_window.width = 50;
+    login_window.height = 18;
     strcpy(login_window.title, "SimpleOS Login");
     login_window.visible = true;
     login_window.active = true;
-    
+
     // Setup title label
-    title_label.x = 90;
-    title_label.y = 65;
+    title_label.x = 20;
+    title_label.y = 6;
     strcpy(title_label.text, "Welcome to SimpleOS");
-    title_label.color = VGA_COLOR_BLACK;
+    title_label.color = VGA_COLOR_WHITE;
     title_label.visible = true;
-    
+
     // Setup username label
-    username_label.x = 70;
-    username_label.y = 85;
+    username_label.x = 20;
+    username_label.y = 9;
     strcpy(username_label.text, "Username:");
-    username_label.color = VGA_COLOR_BLACK;
+    username_label.color = VGA_COLOR_WHITE;
     username_label.visible = true;
-    
+
     // Setup username textbox
-    username_box.x = 70;
-    username_box.y = 95;
-    username_box.width = 180;
-    username_box.height = 16;
+    username_box.x = 20;
+    username_box.y = 10;
+    username_box.width = 40;
+    username_box.height = 1;
     username_box.text[0] = '\0';
     username_box.text_len = 0;
     username_box.max_len = 32;
@@ -73,39 +73,39 @@ void login_init(void) {
     username_box.focused = true;
     username_box.password_mode = false;
     focused_box = &username_box;
-    
+
     // Setup password label
-    password_label.x = 70;
-    password_label.y = 115;
+    password_label.x = 20;
+    password_label.y = 13;
     strcpy(password_label.text, "Password:");
-    password_label.color = VGA_COLOR_BLACK;
+    password_label.color = VGA_COLOR_WHITE;
     password_label.visible = true;
-    
+
     // Setup password textbox
-    password_box.x = 70;
-    password_box.y = 125;
-    password_box.width = 180;
-    password_box.height = 16;
+    password_box.x = 20;
+    password_box.y = 14;
+    password_box.width = 40;
+    password_box.height = 1;
     password_box.text[0] = '\0';
     password_box.text_len = 0;
     password_box.max_len = 32;
     password_box.visible = true;
     password_box.focused = false;
     password_box.password_mode = true;
-    
+
     // Setup login button
-    login_button.x = 120;
-    login_button.y = 145;
-    login_button.width = 80;
-    login_button.height = 20;
+    login_button.x = 35;
+    login_button.y = 17;
+    login_button.width = 10;
+    login_button.height = 1;
     strcpy(login_button.text, "Login");
     login_button.visible = true;
     login_button.pressed = false;
     login_button.hovered = false;
-    
+
     // Setup error label (initially hidden)
-    error_label.x = 90;
-    error_label.y = 170;
+    error_label.x = 20;
+    error_label.y = 19;
     strcpy(error_label.text, "");
     error_label.color = VGA_COLOR_RED;
     error_label.visible = false;
@@ -116,8 +116,8 @@ void login_init(void) {
  */
 void login_draw(void) {
     // Clear screen
-    vga_clear_screen(VGA_COLOR_CYAN);
-    
+    vga_clear_screen(VGA_COLOR_BLUE);
+
     // Draw all GUI elements
     gui_draw_window(&login_window);
     gui_draw_label(&title_label);
@@ -127,9 +127,9 @@ void login_draw(void) {
     gui_draw_textbox(&password_box);
     gui_draw_button(&login_button);
     gui_draw_label(&error_label);
-    
+
     // Draw hint at bottom
-    font_draw_string("Hint: admin/password", 90, 185, VGA_COLOR_DARK_GRAY, 0xFF);
+    font_draw_string("Hint: admin/password", 20, 22, VGA_COLOR_LIGHT_GRAY, VGA_COLOR_BLUE);
 }
 
 /**

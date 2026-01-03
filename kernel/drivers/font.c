@@ -1,13 +1,15 @@
 /**
- * font.c - Simple bitmap font for graphics mode
- * 8x8 pixel font
+ * font.c - Text mode font rendering
+ * Uses VGA text mode for character display
  */
 
 #include "../../include/font.h"
 #include "../../include/vga.h"
 
-// Simple 8x8 bitmap font (ASCII 32-126)
-// Each character is 8 bytes, each byte is one row
+#define VGA_TEXT_MEMORY 0xB8000
+
+// We don't need bitmap font in text mode, we use VGA's built-in font
+// This is just a placeholder
 static const uint8_t font_8x8[95][8] = {
     {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, // Space
     {0x18, 0x3C, 0x3C, 0x18, 0x18, 0x00, 0x18, 0x00}, // !
@@ -72,45 +74,44 @@ static const uint8_t font_8x8[95][8] = {
 };
 
 /**
- * font_draw_char - Draw a character at position
+ * font_draw_char - Draw a character using VGA text mode
  * @c: Character to draw
- * @x: X position
- * @y: Y position
- * @color: Text color
- * @bg_color: Background color (use 0xFF for transparent)
+ * @x: X position (column 0-79)
+ * @y: Y position (row 0-24)
+ * @color: Text color (foreground)
+ * @bg_color: Background color (use 0xFF for current background)
  */
 void font_draw_char(char c, int x, int y, uint8_t color, uint8_t bg_color) {
-    if (c < 32 || c > 126) {
-        c = '?';
+    if (x < 0 || x >= 80 || y < 0 || y >= 25) return;
+
+    uint16_t *video_memory = (uint16_t *)VGA_TEXT_MEMORY;
+    uint8_t attribute;
+
+    if (bg_color == 0xFF) {
+        // Use current background
+        attribute = color;
+    } else {
+        // Combine foreground and background
+        attribute = (bg_color << 4) | (color & 0x0F);
     }
-    
-    const uint8_t *glyph = font_8x8[c - 32];
-    
-    for (int row = 0; row < 8; row++) {
-        uint8_t byte = glyph[row];
-        for (int col = 0; col < 8; col++) {
-            if (byte & (0x80 >> col)) {
-                vga_put_pixel(x + col, y + row, color);
-            } else if (bg_color != 0xFF) {
-                vga_put_pixel(x + col, y + row, bg_color);
-            }
-        }
-    }
+
+    int offset = y * 80 + x;
+    video_memory[offset] = (attribute << 8) | c;
 }
 
 /**
- * font_draw_string - Draw a string at position
+ * font_draw_string - Draw a string using VGA text mode
  * @str: String to draw
- * @x: X position
- * @y: Y position
+ * @x: X position (column)
+ * @y: Y position (row)
  * @color: Text color
  * @bg_color: Background color (0xFF for transparent)
  */
 void font_draw_string(const char *str, int x, int y, uint8_t color, uint8_t bg_color) {
     int offset = 0;
-    while (*str) {
+    while (*str && (x + offset) < 80) {
         font_draw_char(*str, x + offset, y, color, bg_color);
-        offset += 8;
+        offset++;
         str++;
     }
 }

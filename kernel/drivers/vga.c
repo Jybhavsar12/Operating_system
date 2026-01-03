@@ -1,66 +1,55 @@
 /**
- * vga.c - VGA graphics mode driver
- * Supports 320x200 256-color mode (Mode 13h)
+ * vga.c - VGA graphics mode driver (Text-mode based)
+ * Uses VGA text mode to simulate graphics
  */
 
 #include "../../include/vga.h"
 #include "../../include/ports.h"
 #include "../../include/memory.h"
 
-// VGA memory address in Mode 13h
-#define VGA_MEMORY 0xA0000
-#define VGA_WIDTH 320
-#define VGA_HEIGHT 200
+// VGA text mode memory
+#define VGA_TEXT_MEMORY 0xB8000
+#define VGA_WIDTH 80
+#define VGA_HEIGHT 25
 
-static uint8_t *vga_memory = (uint8_t *)VGA_MEMORY;
-static uint8_t current_color = 0x0F; // White
+// Simulated graphics using text mode characters
+static uint16_t *vga_memory = (uint16_t *)VGA_TEXT_MEMORY;
+static uint8_t current_color = 0x0F; // White on black
+
+// Character to use for "pixels" (full block)
+#define PIXEL_CHAR 0xDB
 
 /**
- * vga_set_mode - Switch to VGA graphics mode
- * @mode: VGA mode number (0x13 for 320x200 256-color)
+ * vga_set_mode - Initialize VGA for GUI
+ * @mode: VGA mode (ignored, we use text mode)
  */
 void vga_set_mode(uint8_t mode) {
-    // Use BIOS interrupt to set video mode
-    // In protected mode, we need to set registers directly
-    
-    if (mode == 0x13) {
-        // Mode 13h: 320x200 256 colors
-        // VGA registers setup for mode 13h
-        
-        // Miscellaneous Output Register
-        port_byte_out(0x3C2, 0x63);
-        
-        // Sequencer Registers
-        port_byte_out(0x3C4, 0x00); port_byte_out(0x3C5, 0x03);
-        port_byte_out(0x3C4, 0x01); port_byte_out(0x3C5, 0x01);
-        port_byte_out(0x3C4, 0x02); port_byte_out(0x3C5, 0x0F);
-        port_byte_out(0x3C4, 0x03); port_byte_out(0x3C5, 0x00);
-        port_byte_out(0x3C4, 0x04); port_byte_out(0x3C5, 0x0E);
-        
-        // CRTC Registers
-        port_byte_out(0x3D4, 0x11); port_byte_out(0x3D5, 0x00);
-        
-        // Graphics mode is now active
-    }
+    (void)mode; // We're already in text mode
+    // Just clear the screen
+    vga_clear_screen(VGA_COLOR_BLACK);
 }
 
 /**
  * vga_clear_screen - Clear the screen with a color
- * @color: Color to fill the screen with
+ * @color: Background color to fill
  */
 void vga_clear_screen(uint8_t color) {
-    memset(vga_memory, color, VGA_WIDTH * VGA_HEIGHT);
+    uint16_t blank = (color << 8) | ' ';
+    for (int i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++) {
+        vga_memory[i] = blank;
+    }
 }
 
 /**
- * vga_put_pixel - Draw a pixel at specified coordinates
- * @x: X coordinate (0-319)
- * @y: Y coordinate (0-199)
- * @color: Color index (0-255)
+ * vga_put_pixel - Draw a "pixel" using text mode character
+ * @x: X coordinate (0-79)
+ * @y: Y coordinate (0-24)
+ * @color: Color attribute
  */
 void vga_put_pixel(int x, int y, uint8_t color) {
     if (x >= 0 && x < VGA_WIDTH && y >= 0 && y < VGA_HEIGHT) {
-        vga_memory[y * VGA_WIDTH + x] = color;
+        int offset = y * VGA_WIDTH + x;
+        vga_memory[offset] = (color << 8) | PIXEL_CHAR;
     }
 }
 
@@ -69,11 +58,12 @@ void vga_put_pixel(int x, int y, uint8_t color) {
  * @x: X coordinate
  * @y: Y coordinate
  *
- * Return: Color at that pixel
+ * Return: Color at that position
  */
 uint8_t vga_get_pixel(int x, int y) {
     if (x >= 0 && x < VGA_WIDTH && y >= 0 && y < VGA_HEIGHT) {
-        return vga_memory[y * VGA_WIDTH + x];
+        int offset = y * VGA_WIDTH + x;
+        return (vga_memory[offset] >> 8) & 0xFF;
     }
     return 0;
 }
@@ -110,8 +100,8 @@ void vga_draw_line(int x1, int y1, int x2, int y2, uint8_t color) {
  * @color: Fill color
  */
 void vga_draw_rect(int x, int y, int width, int height, uint8_t color) {
-    for (int dy = 0; dy < height; dy++) {
-        for (int dx = 0; dx < width; dx++) {
+    for (int dy = 0; dy < height && (y + dy) < VGA_HEIGHT; dy++) {
+        for (int dx = 0; dx < width && (x + dx) < VGA_WIDTH; dx++) {
             vga_put_pixel(x + dx, y + dy, color);
         }
     }

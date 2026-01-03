@@ -7,9 +7,9 @@
 
 #include "types.h"
 
-// VGA Mode 13h constants
-#define VGA_WIDTH 320
-#define VGA_HEIGHT 200
+// VGA Text mode dimensions (used for GUI)
+#define VGA_WIDTH 80
+#define VGA_HEIGHT 25
 
 // Common VGA colors (256-color palette)
 #define VGA_COLOR_BLACK         0x00

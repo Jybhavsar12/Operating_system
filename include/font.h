@@ -7,8 +7,8 @@
 
 #include "types.h"
 
-#define FONT_WIDTH 8
-#define FONT_HEIGHT 8
+#define FONT_WIDTH 1
+#define FONT_HEIGHT 1
 
 /**
  * font_draw_char - Draw a character

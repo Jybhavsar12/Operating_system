@@ -16,8 +16,8 @@ static bool gui_initialized = false;
  */
 void gui_init(void) {
     if (!gui_initialized) {
-        vga_set_mode(0x13); // Switch to graphics mode
-        vga_clear_screen(VGA_COLOR_CYAN); // Light blue background
+        vga_set_mode(0x03); // Text mode (already in it)
+        vga_clear_screen(VGA_COLOR_BLUE); // Blue background
         gui_initialized = true;
     }
 }
@@ -28,24 +28,23 @@ void gui_init(void) {
  */
 void gui_draw_window(window_t *win) {
     if (!win->visible) return;
-    
+
     // Draw window background
-    vga_draw_rect(win->x, win->y, win->width, win->height, VGA_COLOR_LIGHT_GRAY);
-    
+    vga_draw_rect(win->x, win->y, win->width, win->height, VGA_COLOR_CYAN);
+
     // Draw title bar
-    vga_draw_rect(win->x, win->y, win->width, 16, VGA_COLOR_BLUE);
-    
+    vga_draw_rect(win->x, win->y, win->width, 2, VGA_COLOR_LIGHT_BLUE);
+
     // Draw title text
-    font_draw_string(win->title, win->x + 4, win->y + 4, VGA_COLOR_WHITE, VGA_COLOR_BLUE);
-    
+    font_draw_string(win->title, win->x + 2, win->y + 1, VGA_COLOR_WHITE, VGA_COLOR_LIGHT_BLUE);
+
     // Draw window border
-    vga_draw_rect_outline(win->x, win->y, win->width, win->height, VGA_COLOR_BLACK);
-    
-    // Draw close button (X)
-    int close_x = win->x + win->width - 14;
-    int close_y = win->y + 2;
-    vga_draw_rect(close_x, close_y, 12, 12, VGA_COLOR_RED);
-    font_draw_char('X', close_x + 2, close_y + 2, VGA_COLOR_WHITE, VGA_COLOR_RED);
+    vga_draw_rect_outline(win->x, win->y, win->width, win->height, VGA_COLOR_WHITE);
+
+    // Draw close button (X) in top right
+    int close_x = win->x + win->width - 3;
+    int close_y = win->y + 1;
+    font_draw_char('X', close_x, close_y, VGA_COLOR_YELLOW, VGA_COLOR_RED);
 }
 
 /**
@@ -54,21 +53,18 @@ void gui_draw_window(window_t *win) {
  */
 void gui_draw_button(button_t *btn) {
     if (!btn->visible) return;
-    
-    uint8_t bg_color = btn->pressed ? VGA_COLOR_DARK_GRAY : VGA_COLOR_LIGHT_GRAY;
-    uint8_t border_color = btn->hovered ? VGA_COLOR_WHITE : VGA_COLOR_BLACK;
-    
+
+    uint8_t bg_color = btn->pressed ? VGA_COLOR_DARK_GRAY : VGA_COLOR_GREEN;
+    uint8_t text_color = VGA_COLOR_BLACK;
+
     // Draw button background
     vga_draw_rect(btn->x, btn->y, btn->width, btn->height, bg_color);
-    
-    // Draw button border
-    vga_draw_rect_outline(btn->x, btn->y, btn->width, btn->height, border_color);
-    
+
     // Draw button text (centered)
     int text_len = strlen(btn->text);
-    int text_x = btn->x + (btn->width - text_len * 8) / 2;
-    int text_y = btn->y + (btn->height - 8) / 2;
-    font_draw_string(btn->text, text_x, text_y, VGA_COLOR_BLACK, bg_color);
+    int text_x = btn->x + (btn->width - text_len) / 2;
+    int text_y = btn->y;
+    font_draw_string(btn->text, text_x, text_y, text_color, bg_color);
 }
 
 /**
@@ -77,16 +73,13 @@ void gui_draw_button(button_t *btn) {
  */
 void gui_draw_textbox(textbox_t *box) {
     if (!box->visible) return;
-    
+
     uint8_t bg_color = box->focused ? VGA_COLOR_WHITE : VGA_COLOR_LIGHT_GRAY;
-    uint8_t border_color = box->focused ? VGA_COLOR_BLUE : VGA_COLOR_BLACK;
-    
+    uint8_t text_color = VGA_COLOR_BLACK;
+
     // Draw textbox background
     vga_draw_rect(box->x, box->y, box->width, box->height, bg_color);
-    
-    // Draw textbox border
-    vga_draw_rect_outline(box->x, box->y, box->width, box->height, border_color);
-    
+
     // Draw text content
     if (box->password_mode) {
         // Show asterisks for password
@@ -95,16 +88,16 @@ void gui_draw_textbox(textbox_t *box) {
             masked[i] = '*';
         }
         masked[box->text_len] = '\0';
-        font_draw_string(masked, box->x + 4, box->y + 4, VGA_COLOR_BLACK, bg_color);
+        font_draw_string(masked, box->x + 1, box->y, text_color, bg_color);
     } else {
-        font_draw_string(box->text, box->x + 4, box->y + 4, VGA_COLOR_BLACK, bg_color);
+        font_draw_string(box->text, box->x + 1, box->y, text_color, bg_color);
     }
-    
+
     // Draw cursor if focused
     if (box->focused) {
-        int cursor_x = box->x + 4 + box->text_len * 8;
-        int cursor_y = box->y + 4;
-        vga_draw_line(cursor_x, cursor_y, cursor_x, cursor_y + 7, VGA_COLOR_BLACK);
+        int cursor_x = box->x + 1 + box->text_len;
+        int cursor_y = box->y;
+        font_draw_char('_', cursor_x, cursor_y, text_color, bg_color);
     }
 }
 
@@ -114,8 +107,8 @@ void gui_draw_textbox(textbox_t *box) {
  */
 void gui_draw_label(label_t *label) {
     if (!label->visible) return;
-    
-    font_draw_string(label->text, label->x, label->y, label->color, 0xFF);
+
+    font_draw_string(label->text, label->x, label->y, label->color, VGA_COLOR_CYAN);
 }
 
 /**
