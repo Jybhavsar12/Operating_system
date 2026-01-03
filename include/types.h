@@ -20,11 +20,12 @@ typedef signed long long   int64_t;
 // Size type
 typedef uint32_t size_t;
 
-// Boolean type
-typedef enum {
-    false = 0,
-    true = 1
-} bool;
+// Boolean type - use standard definitions to avoid C23 keyword conflicts
+#ifndef __cplusplus
+#define bool  _Bool
+#define true  1
+#define false 0
+#endif
 
 // NULL pointer
 #define NULL ((void*)0)
