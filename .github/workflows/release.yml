@@ -29,13 +29,15 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y nasm qemu-system-x86 build-essential
-        
-    - name: Install i686-elf cross-compiler
+        sudo apt-get install -y nasm qemu-system-x86 build-essential wget
+
+    - name: Setup i686-elf cross-compiler
       run: |
-        wget https://github.com/lordmilko/i686-elf-tools/releases/download/7.1.0/i686-elf-tools-linux.zip
-        unzip i686-elf-tools-linux.zip
-        echo "$PWD/i686-elf-tools-linux/bin" >> $GITHUB_PATH
+        # Download and install pre-built cross-compiler
+        cd /tmp
+        wget https://newos.org/toolchains/i686-elf-4.9.1-Linux-x86_64.tar.xz
+        sudo tar -xf i686-elf-4.9.1-Linux-x86_64.tar.xz -C /usr/local
+        echo "/usr/local/cross/bin" >> $GITHUB_PATH
         
     - name: Build OS
       run: make all
