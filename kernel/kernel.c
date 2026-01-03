@@ -9,6 +9,7 @@
 #include "../include/idt.h"
 #include "../include/isr.h"
 #include "../include/keyboard.h"
+#include "../include/shell.h"
 
 /**
  * kernel_main - Main kernel entry point
@@ -38,9 +39,12 @@ void kernel_main(void) {
     print("Initializing keyboard...\n");
     keyboard_init();
 
+    print("Initializing shell...\n");
+    shell_init();
+
     print("\nKernel initialized in 32-bit protected mode\n");
     print("All systems operational.\n\n");
-    print("Type to test keyboard input:\n");
+    print("Welcome to SimpleOS! Type 'help' for available commands.\n");
     print("> ");
 
     // Kernel main loop

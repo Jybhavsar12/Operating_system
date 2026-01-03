@@ -7,6 +7,7 @@
 #include "../../include/ports.h"
 #include "../../include/screen.h"
 #include "../../include/isr.h"
+#include "../../include/shell.h"
 
 // Scancode to ASCII mapping (US keyboard layout)
 const char scancode_to_ascii[] = {
@@ -58,9 +59,9 @@ void keyboard_handler(registers_t regs) {
         } else {
             c = scancode_to_ascii[scancode];
         }
-        
+
         if (c != 0) {
-            print_char(c);
+            shell_handle_input(c);
         }
     }
 }
