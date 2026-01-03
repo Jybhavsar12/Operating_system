@@ -7,6 +7,7 @@
 #include "../../include/idt.h"
 #include "../../include/screen.h"
 #include "../../include/ports.h"
+#include "../../include/keyboard.h"
 
 // Exception messages
 const char *exception_messages[] = {
@@ -187,6 +188,11 @@ void isr_handler(registers_t regs) {
  * @regs: Register state at time of interrupt
  */
 void irq_handler(registers_t regs) {
+    // Handle specific IRQs
+    if (regs.int_no == 33) {
+        keyboard_handler(regs);
+    }
+
     // Send EOI to PICs
     if (regs.int_no >= 40) {
         port_byte_out(0xA0, 0x20);  // Send EOI to slave
