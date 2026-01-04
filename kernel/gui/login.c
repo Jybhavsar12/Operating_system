@@ -138,7 +138,11 @@ void login_draw(void) {
  */
 void login_handle_key(char c) {
     if (!login_active) return;
-    
+
+    // DEBUG: Flash the window title to show keyboard is working
+    static int key_count = 0;
+    key_count++;
+
     if (c == '\t') {
         // Tab: Switch focus between textboxes
         if (focused_box == &username_box) {

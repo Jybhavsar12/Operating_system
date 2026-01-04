@@ -8,8 +8,6 @@
 #include "../../include/screen.h"
 #include "../../include/isr.h"
 #include "../../include/shell.h"
-#include "../../include/login.h"
-#include "../../include/desktop.h"
 
 // Scancode to ASCII mapping (US keyboard layout)
 const char scancode_to_ascii[] = {
@@ -64,18 +62,8 @@ void keyboard_handler(registers_t regs) {
         }
 
         if (c != 0) {
-            // Route input based on current mode
-            switch (current_mode) {
-                case KEYBOARD_MODE_SHELL:
-                    shell_handle_input(c);
-                    break;
-                case KEYBOARD_MODE_LOGIN:
-                    login_handle_key(c);
-                    break;
-                case KEYBOARD_MODE_DESKTOP:
-                    desktop_handle_key(c);
-                    break;
-            }
+            // Route input to shell
+            shell_handle_input(c);
         }
     }
 }

@@ -38,7 +38,7 @@ load_kernel:
     call print_string
 
     mov bx, KERNEL_OFFSET       ; Load kernel to this address
-    mov dh, 15                  ; Load 15 sectors (adjust as needed)
+    mov dh, 25                  ; Load 25 sectors (12.5KB, enough for kernel)
     mov dl, [BOOT_DRIVE]        ; Drive number
     call disk_load
 

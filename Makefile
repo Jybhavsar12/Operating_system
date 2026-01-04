@@ -21,8 +21,7 @@ ASMFLAGS = -f elf32
 C_SOURCES = $(wildcard $(KERNEL_DIR)/*.c) \
             $(wildcard $(KERNEL_DIR)/drivers/*.c) \
             $(wildcard $(KERNEL_DIR)/cpu/*.c) \
-            $(wildcard $(KERNEL_DIR)/memory/*.c) \
-            $(wildcard $(KERNEL_DIR)/gui/*.c)
+            $(wildcard $(KERNEL_DIR)/memory/*.c)
 
 ASM_SOURCES = $(wildcard $(KERNEL_DIR)/*.asm) \
               $(wildcard $(KERNEL_DIR)/cpu/*.asm)

@@ -34,7 +34,10 @@ void vga_set_mode(uint8_t mode) {
  * @color: Background color to fill
  */
 void vga_clear_screen(uint8_t color) {
-    uint16_t blank = (color << 8) | ' ';
+    // VGA text mode format: low byte = char, high byte = attribute
+    // Attribute = (background << 4) | foreground
+    uint8_t attribute = (color << 4) | VGA_COLOR_BLACK; // Background color, black text
+    uint16_t blank = (attribute << 8) | ' ';
     for (int i = 0; i < VGA_WIDTH * VGA_HEIGHT; i++) {
         vga_memory[i] = blank;
     }
@@ -44,12 +47,14 @@ void vga_clear_screen(uint8_t color) {
  * vga_put_pixel - Draw a "pixel" using text mode character
  * @x: X coordinate (0-79)
  * @y: Y coordinate (0-24)
- * @color: Color attribute
+ * @color: Color attribute (background color)
  */
 void vga_put_pixel(int x, int y, uint8_t color) {
     if (x >= 0 && x < VGA_WIDTH && y >= 0 && y < VGA_HEIGHT) {
         int offset = y * VGA_WIDTH + x;
-        vga_memory[offset] = (color << 8) | PIXEL_CHAR;
+        // Use full block character with color as background
+        uint8_t attribute = (color << 4) | color; // Same color for fg and bg
+        vga_memory[offset] = (attribute << 8) | PIXEL_CHAR;
     }
 }
 
