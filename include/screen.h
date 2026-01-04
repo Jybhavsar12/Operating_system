@@ -71,5 +71,11 @@ void set_cursor(int offset);
  */
 int get_cursor(void);
 
+/**
+ * print_int - Print an integer to screen
+ * @n: Integer to print
+ */
+void print_int(int n);
+
 #endif // SCREEN_H
 

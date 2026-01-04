@@ -149,6 +149,35 @@ static void set_char_at_offset(char c, int offset) {
 }
 
 /**
+ * print_int - Print an integer to screen
+ * @n: Integer to print
+ */
+void print_int(int n) {
+    if (n == 0) {
+        print_char('0');
+        return;
+    }
+
+    if (n < 0) {
+        print_char('-');
+        n = -n;
+    }
+
+    char buffer[12]; // Enough for 32-bit int
+    int i = 0;
+
+    while (n > 0) {
+        buffer[i++] = '0' + (n % 10);
+        n /= 10;
+    }
+
+    // Print in reverse order
+    while (i > 0) {
+        print_char(buffer[--i]);
+    }
+}
+
+/**
  * scroll_screen - Scroll screen if necessary
  * @offset: Current cursor offset
  *

@@ -26,15 +26,15 @@ SimpleOS is a lightweight, educational operating system designed to help student
 - Basic memory management
 
 ### User Interface
-- **GUI Mode** (NEW! 🎨)
-  - VGA graphics mode (320x200, 256 colors)
-  - Login screen with authentication
-  - Graphical desktop environment
-  - Windows, buttons, textboxes, and labels
-  - 8x8 bitmap font rendering
-- **Text Mode**
-  - VGA text mode display driver
-  - Simple command-line shell
+- VGA text mode display driver (80x25)
+- Interactive command-line shell
+- Keyboard input with backspace support
+
+### File System (NEW! 📁)
+- In-memory file system
+- Support for up to 32 files
+- File size up to 1KB each
+- File operations: create, write, read, delete, list
 
 ## Architecture
 
@@ -55,8 +55,10 @@ SimpleOS Architecture
 │   │   ├── GDT (gdt.c)
 │   │   ├── IDT (idt.c)
 │   │   └── ISR (isr.c)
-│   └── Memory
-│       └── Memory manager (memory.c)
+│   ├── Memory
+│   │   └── Memory manager (memory.c)
+│   └── File System
+│       └── In-memory FS (filesystem.c)
 │
 └── Shell (shell.c)
     └── Command interpreter
@@ -96,28 +98,72 @@ SimpleOS Architecture
    make run
    ```
 
-5. **Login to the GUI** (default mode)
-   - Username: `admin`
-   - Password: `password`
-   - Press `Tab` to switch between fields
-   - Press `Enter` to login
+5. Use the shell commands (see below)
 
-6. **Switch to Text Mode** (optional)
-   - Edit `kernel/kernel.c`
-   - Change `boot_mode = BOOT_MODE_GUI` to `boot_mode = BOOT_MODE_TEXT`
-   - Rebuild: `make clean && make`
-
-7. Clean build files
+6. Clean build files
    ```bash
    make clean
    ```
+
+## Shell Commands
+
+SimpleOS includes an interactive shell with the following commands:
+
+### System Commands
+- **`help`** - Display available commands
+- **`clear`** - Clear the screen
+- **`about`** - Display system information
+- **`echo <text>`** - Echo text back to screen
+
+### File System Commands
+- **`touch <filename>`** - Create a new file
+  ```
+  > touch myfile.txt
+  File 'myfile.txt' created successfully.
+  ```
+
+- **`write <filename>`** - Write content to a file
+  ```
+  > write myfile.txt
+  Enter content (type 'EOF' on new line to finish):
+  Hello World!
+  This is my first file.
+  EOF
+  File saved.
+  ```
+
+- **`cat <filename>`** - Display file contents
+  ```
+  > cat myfile.txt
+  Hello World!
+  This is my first file.
+  ```
+
+- **`ls`** - List all files with sizes
+  ```
+  > ls
+  Files:
+    myfile.txt (42 bytes)
+    test.txt (15 bytes)
+  ```
+
+- **`rm <filename>`** - Delete a file
+  ```
+  > rm test.txt
+  File 'test.txt' deleted successfully.
+  ```
+
+### File System Limitations
+- Maximum 32 files
+- Maximum file size: 1KB (1024 bytes)
+- Files are stored in memory (lost on reboot)
+- Filenames limited to 32 characters
 
 ## Documentation
 
 Detailed documentation is available in the `docs/` directory:
 
 - [Quick Start Guide](docs/QUICK_START.md) - Get started in 5 minutes
-- [GUI System](docs/GUI_SYSTEM.md) - **NEW!** Graphical interface guide
 - [Building from Source](docs/BUILDING.md)
 - [Architecture Overview](docs/ARCHITECTURE.md)
 - [Bootloader Explained](docs/BOOTLOADER.md)
@@ -138,10 +184,12 @@ Operating_system/
 │   └── boot.asm       # 16-bit bootloader
 ├── kernel/            # Kernel source code
 │   ├── kernel.c       # Main kernel
+│   ├── shell.c        # Command shell
 │   ├── kernel_entry.asm
 │   ├── drivers/       # Device drivers
 │   ├── cpu/           # CPU-related code
-│   └── memory/        # Memory management
+│   ├── memory/        # Memory management
+│   └── filesystem/    # File system
 ├── include/           # Header files
 ├── docs/              # Documentation
 ├── build/             # Build output
